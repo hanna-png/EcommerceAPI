@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 
+
 #frozen=True means object is immutable
 @dataclass(frozen=True)
 class Settings:
