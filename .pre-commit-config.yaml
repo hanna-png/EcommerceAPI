@@ -1,7 +1,5 @@
----
-exclude: ""
 repos:
-  # Set the list of basic git hooks to find and fix common problems in the current working tree.
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -13,13 +11,12 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
-  # Use the static code checker to find and fix logical errors in python source code.
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.6
     hooks:
       - id: ruff
-        language_version: python3
-        args:
-          - --fix
+        types: [python]
+        args: [--fix]
       - id: ruff-format
- 
+        types: [python]
