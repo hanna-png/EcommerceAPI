@@ -24,6 +24,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/db/init:/docker-entrypoint-initdb.d
+      - ./docker/db/dump:/dumps
 
   adminer:
     image: adminer
