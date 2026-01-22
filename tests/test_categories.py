@@ -1,16 +1,13 @@
-from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
 from tests.factories.category_factory import CategoryFactory
 
 
 def test_categories_returns_all(
-    test_client: TestClient, db_test_session: Session
+    test_client: TestClient, category_factory: CategoryFactory
 ) -> None:
     """Checks if /categories returns all categories from the database."""
-    categories = CategoryFactory.create_batch(5)
-    db_test_session.add_all(categories)
-    db_test_session.flush()
+    CategoryFactory.create_batch(5)
 
     response = test_client.get("/categories")
     returned_categories = response.json()

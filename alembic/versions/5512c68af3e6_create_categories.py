@@ -1,8 +1,8 @@
-"""add categories third try
+"""create categories
 
-Revision ID: 3c939e7a9a30
-Revises: e93dfe39336a
-Create Date: 2026-01-20 13:45:28.586267
+Revision ID: 5512c68af3e6
+Revises:
+Create Date: 2026-01-22 12:10:44.944170
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "3c939e7a9a30"
-down_revision: Union[str, Sequence[str], None] = "e93dfe39336a"
+revision: str = "5512c68af3e6"
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

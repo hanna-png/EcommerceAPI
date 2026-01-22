@@ -25,9 +25,11 @@ target_metadata = Base.metadata
 
 
 config = context.config
-database_url = os.getenv("DATABASE_URL")
-if database_url:
-    config.set_main_option("sqlalchemy.url", database_url)
+existing = config.get_main_option("sqlalchemy.url")
+if not existing:
+    env_url = os.getenv("DATABASE_URL")
+    if env_url:
+        config.set_main_option("sqlalchemy.url", env_url)
 
 
 # other values from the config, defined by the needs of env.py,
