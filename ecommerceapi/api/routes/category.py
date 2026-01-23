@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ecommerceapi.db.database import get_db
 from ecommerceapi.schemas.category import CategoryOut
-from ecommerceapi.services.category import get_categories
+from ecommerceapi.repositories.category import CategoryRepository
 
 category_router = APIRouter(prefix="/categories", tags=["categories"])
 
@@ -13,4 +13,4 @@ def list_categories(db: Session = Depends(get_db)) -> list[CategoryOut]:
     """
     Retrieve a list of all product categories.
     """
-    return get_categories(db)
+    return CategoryRepository.get_all(db)
