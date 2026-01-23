@@ -27,7 +27,6 @@ make build
 Run database migrations:
 ```bash
 make migrate
-make migrate-test
 ```
 
 API will be available at:
