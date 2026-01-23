@@ -1,9 +1,9 @@
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-from ecommerceapi.db.base import Base
+from ecommerceapi.db.base import BaseModel
 
 
-class Category(Base):
+class Category(BaseModel):
     """
     Database model representing  product category.
     """
