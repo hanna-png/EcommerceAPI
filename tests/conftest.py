@@ -19,27 +19,13 @@ DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST")
 if not DATABASE_URL_TEST:
     raise RuntimeError("DATABASE_URL_TEST is not set")
 
-POSTGRES_TEST_DB = os.getenv("POSTGRES_TEST_DB")
-if not POSTGRES_TEST_DB:
-    raise RuntimeError("POSTGRES_TEST_DB is not set")
-
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "db")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-
-if not POSTGRES_USER or not POSTGRES_PASSWORD:
-    raise RuntimeError("POSTGRES_USER/POSTGRES_PASSWORD must be set")
-
 
 def _admin_url() -> str:
     """
-    Build an admin connection URL to the default 'postgres' DB.
+    Reuse DATABASE_URL_TEST credentials/host/port, but connect to the 'postgres' DB.
     """
-    return (
-        f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-        f"@{POSTGRES_HOST}:{POSTGRES_PORT}/postgres"
-    )
+    url = make_url(DATABASE_URL_TEST)
+    return url.set(database="postgres").render_as_string(hide_password=False)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -78,7 +64,7 @@ def test_database_lifecycle():
                     WHERE datname = :name AND pid <> pg_backend_pid()
                     """
                 ),
-                {"name": POSTGRES_TEST_DB},
+                {"name": test_url.database},
             )
     finally:
         admin_engine.dispose()
