@@ -24,19 +24,10 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pre-commit (>=4.5.1,<5.0.0)"
+    "pre-commit (>=4.5.1,<5.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "factory-boy (>=3.3.3,<4.0.0)",
+    "faker (>=40.1.2,<41.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "sqlalchemy-utils (>=0.42.1,<0.43.0)"
 ]
-
-[tool.ruff]
-line-length = 88
-target-version = "py313"
-fix = true
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP"]
-ignore = ["B008"]
-
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"

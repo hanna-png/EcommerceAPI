@@ -4,6 +4,8 @@ services:
     container_name: ecommerce_api
     env_file:
       - .env
+    environment:
+      PYTHONPATH: /app
     ports:
       - "8000:8000"
     depends_on:
@@ -21,6 +23,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./docker/db/dump:/dumps
 
   adminer:
     image: adminer
