@@ -13,6 +13,7 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 from ecommerceapi.db.database import get_db
 from ecommerceapi.main import app
 from tests.factories.category_factory import CategoryFactory
+from tests.factories.product_factory import ProductFactory
 
 
 DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST")
@@ -125,3 +126,9 @@ def test_client(db_test_session: Session):
 def category_factory(db_test_session):
     CategoryFactory._meta.sqlalchemy_session = db_test_session
     return CategoryFactory
+
+
+@pytest.fixture()
+def product_factory(db_test_session):
+    ProductFactory._meta.sqlalchemy_session = db_test_session
+    return ProductFactory
