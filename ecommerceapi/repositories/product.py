@@ -7,6 +7,9 @@ from ecommerceapi.models.product import Product
 class ProductRepository:
     @staticmethod
     def get_by_category(db: Session, category_id: int) -> list[Product]:
+        """
+        Retrieve all products by category.
+        """
         stmt = (
             select(Product)
             .where(Product.category_id == category_id)
@@ -16,6 +19,7 @@ class ProductRepository:
 
     @staticmethod
     def search(db: Session, query: str) -> list[Product]:
+        """Retrieve all products that match the query."""
         pattern = f"%{query}%"
         stmt = (
             select(Product)
@@ -31,5 +35,6 @@ class ProductRepository:
 
     @staticmethod
     def get_by_id(db: Session, product_id: int) -> Product | None:
+        """Retrieve product by id."""
         stmt = select(Product).where(Product.id == product_id)
         return db.execute(stmt).scalars().first()

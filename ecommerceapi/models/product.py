@@ -5,6 +5,10 @@ from ecommerceapi.db.base import BaseModel
 
 
 class Product(BaseModel):
+    """
+    Database model representing  product.
+    """
+
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)

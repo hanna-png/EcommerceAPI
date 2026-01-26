@@ -2,6 +2,10 @@ from pydantic import BaseModel, ConfigDict
 
 
 class ProductListOut(BaseModel):
+    """
+    API schema representing a product category returned in response without the description and sku.
+    """
+
     model_config = ConfigDict(from_attributes=True)
     id: int
     category_id: int
@@ -10,6 +14,10 @@ class ProductListOut(BaseModel):
 
 
 class ProductDetailOut(BaseModel):
+    """
+    API schema representing a product category returned in response with description and sku.
+    """
+
     model_config = ConfigDict(from_attributes=True)
     id: int
     category_id: int
