@@ -22,4 +22,7 @@ def list_categories(db: Session = Depends(get_db)) -> list[CategoryOut]:
 def category_products(
     category_id: int, db: Session = Depends(get_db)
 ) -> list[ProductListOut]:
+    """
+    Retrieve a list of all available products in a specific category.
+    """
     return ProductRepository.get_by_category(db, category_id)
