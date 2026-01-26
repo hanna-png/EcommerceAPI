@@ -1,4 +1,3 @@
-from decimal import Decimal
 from pydantic import BaseModel, ConfigDict
 
 
@@ -7,7 +6,7 @@ class ProductListOut(BaseModel):
     id: int
     category_id: int
     name: str
-    price: Decimal | None = None
+    price: float | None = None
 
 
 class ProductDetailOut(BaseModel):
@@ -15,7 +14,7 @@ class ProductDetailOut(BaseModel):
     id: int
     category_id: int
     name: str
-    price: Decimal | None = None
+    price: float | None = None
     # additional info
     description: str | None = None
     sku: str | None = None
