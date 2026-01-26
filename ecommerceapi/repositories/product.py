@@ -1,5 +1,5 @@
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ecommerceapi.models.product import Product
 
@@ -36,5 +36,9 @@ class ProductRepository:
     @staticmethod
     def get_by_id(db: Session, product_id: int) -> Product | None:
         """Retrieve product by id."""
-        stmt = select(Product).where(Product.id == product_id)
+        stmt = (
+            select(Product)
+            .options(joinedload(Product.category))
+            .where(Product.id == product_id)
+        )
         return db.execute(stmt).scalars().first()

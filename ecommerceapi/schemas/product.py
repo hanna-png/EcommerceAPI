@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from ecommerceapi.schemas.category import CategoryOut
 
 
 class ProductListOut(BaseModel):
@@ -26,3 +27,4 @@ class ProductDetailOut(BaseModel):
     # additional info
     description: str | None = None
     sku: str | None = None
+    category: CategoryOut
