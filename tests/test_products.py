@@ -28,16 +28,15 @@ def test_products_details_returns_correct_product(
     category_factory: CategoryFactory,
     product_factory: ProductFactory,
 ):
-    product_factory.create(id=1)
-    product2 = product_factory.create(id=2)
+    product = ProductFactory()
 
-    resp = test_client.get("/products/2/details")
+    resp = test_client.get(f"/products/{product.id}/details")
     assert resp.status_code == 200
     item = resp.json()
 
-    assert item["id"] == 2
-    assert item["category_id"] == product2.category_id
-    assert item["name"] == product2.name
-    assert item["price"] == product2.price
-    assert item["description"] == product2.description
-    assert item["sku"] == product2.sku
+    assert item["id"] == product.id
+    assert item["category_id"] == product.category_id
+    assert item["name"] == product.name
+    assert item["price"] == product.price
+    assert item["description"] == product.description
+    assert item["sku"] == product.sku
