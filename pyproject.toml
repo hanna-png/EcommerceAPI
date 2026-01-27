@@ -14,7 +14,10 @@ dependencies = [
     "sqlalchemy (>=2.0.45,<3.0.0)",
     "psycopg2-binary (>=2.9.11,<3.0.0)",
     "alembic (>=1.18.0,<2.0.0)",
-    "ruff (>=0.14.11,<0.15.0)"
+    "ruff (>=0.14.11,<0.15.0)",
+    "python-jose (>=3.3.0,<4.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "python-multipart (>=0.0.9,<1.0.0)"
 ]
 
 
