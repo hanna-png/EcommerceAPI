@@ -42,4 +42,5 @@ def test_products_details_returns_correct_product(
 
     category = item["category"]
     assert set(category.keys()) == {"id", "name"}
-    assert category["id"] == product.category_id
+    assert category["id"] == product.category.id
+    assert category["name"] == product.category.name
