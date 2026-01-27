@@ -35,8 +35,11 @@ def test_products_details_returns_correct_product(
     item = resp.json()
 
     assert item["id"] == product.id
-    assert item["category_id"] == product.category_id
     assert item["name"] == product.name
     assert item["price"] == product.price
     assert item["description"] == product.description
     assert item["sku"] == product.sku
+
+    category = item["category"]
+    assert set(category.keys()) == {"id", "name"}
+    assert category["id"] == product.category_id
