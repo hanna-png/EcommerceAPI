@@ -14,6 +14,7 @@ from ecommerceapi.db.database import get_db
 from ecommerceapi.main import app
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.product_factory import ProductFactory
+from tests.factories.user_factory import UserFactory
 
 
 DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST")
@@ -132,3 +133,9 @@ def category_factory(db_test_session):
 def product_factory(db_test_session):
     ProductFactory._meta.sqlalchemy_session = db_test_session
     return ProductFactory
+
+
+@pytest.fixture()
+def user_factory(db_test_session):
+    UserFactory._meta.sqlalchemy_session = db_test_session
+    return UserFactory
