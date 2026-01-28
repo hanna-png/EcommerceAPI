@@ -113,11 +113,16 @@ def test_client(db_test_session: Session):
     """Create FastAPI TestClient"""
 
     def override_get_db():
-        yield db_test_session
+        try:
+            yield db_test_session
+            db_test_session.commit()
+        except Exception:
+            db_test_session.rollback()
+            raise
 
     app.dependency_overrides[get_db] = override_get_db
     try:
-        with TestClient(app) as client:
+        with TestClient(app, raise_server_exceptions=False) as client:
             yield client
     finally:
         app.dependency_overrides.clear()

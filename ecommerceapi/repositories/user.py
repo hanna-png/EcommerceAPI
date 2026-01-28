@@ -31,6 +31,6 @@ class UserRepository:
             last_name=last_name,
         )
         db.add(user)
-        db.commit()
+        db.flush()
         db.refresh(user)
         return user

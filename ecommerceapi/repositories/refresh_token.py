@@ -18,7 +18,7 @@ class RefreshTokenRepository:
             revoked_at=None,
         )
         db.add(rt)
-        db.commit()
+        db.flush()
         db.refresh(rt)
         return rt
 
@@ -45,7 +45,6 @@ class RefreshTokenRepository:
             .where(RefreshToken.jti == jti)
             .values(revoked_at=datetime.now(timezone.utc))
         )
-        db.commit()
 
     @staticmethod
     def revoke_all_for_user(db: Session, *, user_id: int) -> None:
@@ -54,4 +53,3 @@ class RefreshTokenRepository:
             .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
             .values(revoked_at=datetime.now(timezone.utc))
         )
-        db.commit()

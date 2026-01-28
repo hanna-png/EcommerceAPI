@@ -23,7 +23,7 @@ class AddressRepository:
             country=country,
         )
         db.add(addr)
-        db.commit()
+        db.flush()
         db.refresh(addr)
         return addr
 

@@ -1,11 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-
-
-class AddressCreate(BaseModel):
-    city: str
-    region: str | None = None
-    postal_code: str
-    country: str
+from ecommerceapi.schemas.address import AddressCreate
 
 
 class RegisterIn(BaseModel):
@@ -20,3 +14,7 @@ class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class MessageOut(BaseModel):
+    message: str

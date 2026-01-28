@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ecommerceapi.db.base import BaseModel
 
@@ -18,3 +18,5 @@ class Address(BaseModel):
         unique=True,
         nullable=False,
     )
+
+    user = relationship("User", back_populates="address")

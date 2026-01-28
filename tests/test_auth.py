@@ -1,4 +1,6 @@
 from fastapi.testclient import TestClient
+from sqlalchemy import select
+from ecommerceapi.models.user import User
 
 from tests.factories.user_factory import UserFactory
 
@@ -69,4 +71,33 @@ def test_logout_revokes_refresh_token(
 
     out = test_client.post("/auth/logout", params={"refresh_token": refresh})
     assert out.status_code == 200
-    assert out.json()["status"] == "ok"
+    assert out.json()["message"] == "ok"
+
+
+def test_register_rolls_back_if_address_create_fails(
+    test_client: TestClient, db_test_session, monkeypatch
+):
+    # raises exception because country is limited to 2 chars.
+    payload = {
+        "email": "rollback@test.com",
+        "password": "password123",
+        "first_name": "Hanna",
+        "last_name": "Kirieieva",
+        "address": {
+            "city": "Warsaw",
+            "region": None,
+            "postal_code": "00-001",
+            "country": "POL",
+        },
+    }
+
+    resp = test_client.post("/auth/register", json=payload)
+    assert resp.status_code == 422
+
+    user = (
+        db_test_session.execute(select(User).where(User.email == "rollback@test.com"))
+        .scalars()
+        .first()
+    )
+
+    assert user is None
