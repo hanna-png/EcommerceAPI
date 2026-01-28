@@ -92,7 +92,7 @@ def test_register_rolls_back_if_address_create_fails(
     }
 
     resp = test_client.post("/auth/register", json=payload)
-    assert resp.status_code == 422
+    assert resp.status_code == 500
 
     user = (
         db_test_session.execute(select(User).where(User.email == "rollback@test.com"))

@@ -14,7 +14,3 @@ class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-
-
-class MessageOut(BaseModel):
-    message: str

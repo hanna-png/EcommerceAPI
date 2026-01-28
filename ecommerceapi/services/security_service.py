@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 
 from ecommerceapi.core.security import (
     create_access_token,
@@ -14,14 +14,37 @@ from ecommerceapi.core.security import (
 from ecommerceapi.repositories.address import AddressRepository
 from ecommerceapi.repositories.refresh_token import RefreshTokenRepository
 from ecommerceapi.repositories.user import UserRepository
-from ecommerceapi.schemas.security import RegisterIn, TokenPair, MessageOut
+from ecommerceapi.schemas.security import RegisterIn, TokenPair
+from ecommerceapi.schemas.general import MessageOut
+from ecommerceapi.core.exceptions import (
+    ValidationException,
+    UnauthorizedException,
+    BaseAppException,
+)
 
 
 class SecurityService:
     @staticmethod
+    def _validate_refresh_token(refresh_token: str):
+        try:
+            payload = decode_token(refresh_token)
+        except ValueError:
+            raise UnauthorizedException("Invalid refresh token")
+
+        if payload.get("type") != "refresh":
+            raise UnauthorizedException("Invalid refresh token")
+
+        jti = payload.get("jti")
+        sub = payload.get("sub")
+        if not jti or not sub:
+            raise UnauthorizedException("Invalid refresh token ")
+
+        return payload
+
+    @staticmethod
     def register(db: Session, payload: RegisterIn):
         if UserRepository.get_by_email(db, payload.email):
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise ValidationException("Email already registered")
 
         try:
             user = UserRepository.create(
@@ -40,25 +63,18 @@ class SecurityService:
                 postal_code=payload.address.postal_code,
                 country=payload.address.country,
             )
-
             user.address = address
             return user
 
         except Exception:
             db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Email already registered",
-            )
+            raise BaseAppException("Unexpected error occurred")
 
     @staticmethod
     def login(db: Session, *, email: str, password: str) -> TokenPair:
         user = UserRepository.get_by_email(db, email)
         if not user or not verify_password(password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-            )
+            raise UnauthorizedException("Invalid credentials")
 
         access = create_access_token(user_id=str(user.id))
         refresh, refresh_exp, jti = create_refresh_token(user_id=str(user.id))
@@ -75,75 +91,30 @@ class SecurityService:
 
     @staticmethod
     def logout(db: Session, refresh_token: str) -> MessageOut:
-        try:
-            payload = decode_token(refresh_token)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token",
-            )
+        payload = SecurityService._validate_refresh_token(refresh_token)
 
-        if payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token",
-            )
-
-        jti = payload.get("jti")
-        if not jti:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid payload",
-            )
-
-        RefreshTokenRepository.revoke(db, jti=jti)
+        RefreshTokenRepository.revoke(db, jti=payload["jti"])
         return MessageOut(message="ok")
 
     @staticmethod
     def refresh_tokens(db: Session, refresh_token: str) -> TokenPair:
-        try:
-            payload = decode_token(refresh_token)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token",
-            )
+        payload = SecurityService._validate_refresh_token(refresh_token)
 
-        if payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Wrong token type",
-            )
+        user_id = int(payload["sub"])
 
-        sub = payload.get("sub")
-        jti = payload.get("jti")
-        if not sub or not jti:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid payload",
-            )
-
-        user_id = int(sub)
-
-        rt = RefreshTokenRepository.get_valid_by_jti(db, jti)
+        rt = RefreshTokenRepository.get_valid_by_jti(db, payload["jti"])
         if not rt:
             RefreshTokenRepository.revoke_all_for_user(db, user_id=user_id)
             # commit in service because we want to revoke AND raise an exception
             db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token revoked or expired",
-            )
+            raise UnauthorizedException("Refresh token revoked or expired")
 
         if rt.token_hash != hash_token(refresh_token):
             RefreshTokenRepository.revoke_all_for_user(db, user_id=user_id)
             db.commit()
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token is not correct.",
-            )
+            raise UnauthorizedException("Refresh token is not correct.")
 
-        RefreshTokenRepository.revoke(db, jti=jti)
+        RefreshTokenRepository.revoke(db, jti=payload["jti"])
 
         new_access = create_access_token(user_id=str(user_id))
         new_refresh, new_exp, new_jti = create_refresh_token(user_id=str(user_id))

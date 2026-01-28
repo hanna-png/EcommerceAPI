@@ -3,7 +3,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from ecommerceapi.db.database import get_db
-from ecommerceapi.schemas.security import RegisterIn, TokenPair, MessageOut
+from ecommerceapi.schemas.security import RegisterIn, TokenPair
+from ecommerceapi.schemas.general import MessageOut
 from ecommerceapi.schemas.user import UserOut
 from ecommerceapi.services.security_service import SecurityService
 
