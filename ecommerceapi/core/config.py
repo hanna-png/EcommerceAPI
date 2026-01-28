@@ -1,25 +1,21 @@
-import os
-from dataclasses import dataclass
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# frozen=True means object is immutable
-@dataclass(frozen=True)
-class Settings:
-    """
-    Container for storing configuration settings loaded from .env file.
-    """
-
+class Settings(BaseSettings):
     database_url: str
+    jwt_secret_key: str
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+
+settings = Settings()
 
 
 def get_settings() -> Settings:
-    """
-    Loads settings from environment variables into a Settings object and returns it.
-    """
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise RuntimeError("DATABASE_URL is not set")
-    return Settings(database_url=database_url)
-
-
-settings = get_settings()
+    return settings

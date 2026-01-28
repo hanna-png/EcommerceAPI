@@ -14,6 +14,7 @@ from ecommerceapi.db.database import get_db
 from ecommerceapi.main import app
 from tests.factories.category_factory import CategoryFactory
 from tests.factories.product_factory import ProductFactory
+from tests.factories.user_factory import UserFactory
 
 
 DATABASE_URL_TEST = os.getenv("DATABASE_URL_TEST")
@@ -112,11 +113,16 @@ def test_client(db_test_session: Session):
     """Create FastAPI TestClient"""
 
     def override_get_db():
-        yield db_test_session
+        try:
+            yield db_test_session
+            db_test_session.commit()
+        except Exception:
+            db_test_session.rollback()
+            raise
 
     app.dependency_overrides[get_db] = override_get_db
     try:
-        with TestClient(app) as client:
+        with TestClient(app, raise_server_exceptions=False) as client:
             yield client
     finally:
         app.dependency_overrides.clear()
@@ -132,3 +138,9 @@ def category_factory(db_test_session):
 def product_factory(db_test_session):
     ProductFactory._meta.sqlalchemy_session = db_test_session
     return ProductFactory
+
+
+@pytest.fixture()
+def user_factory(db_test_session):
+    UserFactory._meta.sqlalchemy_session = db_test_session
+    return UserFactory
