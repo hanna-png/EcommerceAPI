@@ -101,3 +101,18 @@ def test_register_rolls_back_if_address_create_fails(
     )
 
     assert user is None
+
+
+def test_login_invalid_credentials_returns_401(test_client):
+    resp = test_client.post(
+        "/auth/login",
+        data={"username": "missing@test.com", "password": "wrong"},
+    )
+    assert resp.status_code == 401
+    assert resp.json()["detail"]
+
+
+def test_get_missing_resource_returns_404(test_client):
+    resp = test_client.get("/products/999999")
+    assert resp.status_code == 404
+    assert resp.json()["detail"]

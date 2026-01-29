@@ -12,6 +12,7 @@ from ecommerceapi.core.exceptions import (
     UnauthorizedException,
 )
 from ecommerceapi.schemas.general import ErrorOut
+from ecommerceapi.core.logging import logger
 
 app = FastAPI()
 app.include_router(api_router)
@@ -24,8 +25,12 @@ def health(db: Session = Depends(get_db)):
 
 
 @app.exception_handler(BaseAppException)
-async def app_exception_handler(request: Request, exc: BaseAppException):
+def app_exception_handler(request: Request, exc: BaseAppException):
     error = ErrorOut(detail=exc.message)
+    logger.error(
+        f"{exc.__class__.__name__} | {request.method} {request.url.path} | {exc.message}",
+        exc_info=True,
+    )
 
     if isinstance(exc, ResourceNotFoundException):
         status_code = 404
@@ -37,3 +42,13 @@ async def app_exception_handler(request: Request, exc: BaseAppException):
         status_code = 500
 
     return JSONResponse(status_code=status_code, content=error.model_dump())
+
+
+@app.exception_handler(Exception)
+def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.critical(
+        f"Unhandled error | {request.method} {request.url.path}",
+        exc_info=True,
+    )
+    error = ErrorOut(detail="Unexpected error occurred.")
+    return JSONResponse(status_code=500, content=error.model_dump())

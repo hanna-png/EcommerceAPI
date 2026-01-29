@@ -101,7 +101,10 @@ class SecurityService:
 
     @staticmethod
     def login(db: Session, *, email: str, password: str) -> TokenPair:
-        user = UserRepository.get_by_email(db, email)
+        try:
+            user = UserRepository.get_by_email(db, email)
+        except ResourceNotFoundException:
+            raise UnauthorizedException("User not found")
         if not verify_password(password, user.hashed_password):
             raise UnauthorizedException("Invalid credentials")
 
