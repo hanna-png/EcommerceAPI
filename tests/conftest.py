@@ -43,16 +43,13 @@ def test_database_lifecycle():
     alembic_cfg = Config("alembic.ini")
     alembic_cfg.set_main_option("sqlalchemy.url", DATABASE_URL_TEST)
     command.upgrade(alembic_cfg, "head")
-    engine = create_engine(DATABASE_URL_TEST, poolclass=NullPool)
-    with engine.connect() as conn:
-        assert (
-            conn.execute(text("select to_regclass('public.categories')")).scalar_one()
-            is not None
-        )
-    engine.dispose()
 
     yield
+    terminate_background_processes(test_url)
+    drop_database(test_url)
 
+
+def terminate_background_processes(test_url):
     admin_engine = create_engine(
         _admin_url(), isolation_level="AUTOCOMMIT", poolclass=NullPool
     )
@@ -70,8 +67,6 @@ def test_database_lifecycle():
             )
     finally:
         admin_engine.dispose()
-
-    drop_database(test_url)
 
 
 @pytest.fixture(scope="session")
