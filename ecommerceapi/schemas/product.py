@@ -27,3 +27,14 @@ class ProductDetailOut(BaseModel):
     description: str | None = None
     sku: str | None = None
     category: CategoryOut
+
+
+class ProductSerializedOut(BaseModel):
+    """
+    API schema for testing serialization.
+    """
+
+    id: int
+    name: str
+    price: float | None = None
+    starts_with_a: bool
