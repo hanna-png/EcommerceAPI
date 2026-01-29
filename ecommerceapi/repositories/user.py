@@ -2,18 +2,25 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ecommerceapi.models.user import User
+from ecommerceapi.core.exceptions import ResourceNotFoundException
 
 
 class UserRepository:
     @staticmethod
     def get_by_email(db: Session, email: str) -> User | None:
         stmt = select(User).where(User.email == email)
-        return db.execute(stmt).scalars().first()
+        u = db.execute(stmt).scalars().first()
+        if not u:
+            raise ResourceNotFoundException("User not found")
+        return u
 
     @staticmethod
-    def get_by_id(db: Session, user_id: int) -> User | None:
+    def get_by_id(db: Session, user_id: int) -> User:
         stmt = select(User).where(User.id == user_id)
-        return db.execute(stmt).scalars().first()
+        u = db.execute(stmt).scalars().first()
+        if not u:
+            raise ResourceNotFoundException("User not found")
+        return u
 
     @staticmethod
     def create(

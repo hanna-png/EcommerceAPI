@@ -3,6 +3,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from ecommerceapi.models.refresh_token import RefreshToken
+from ecommerceapi.core.exceptions import ResourceNotFoundException
 
 
 class RefreshTokenRepository:
@@ -23,20 +24,12 @@ class RefreshTokenRepository:
         return rt
 
     @staticmethod
-    def get_by_jti(db: Session, jti: str) -> RefreshToken | None:
+    def get_by_jti(db: Session, jti: str) -> RefreshToken:
         stmt = select(RefreshToken).where(RefreshToken.jti == jti)
-        return db.execute(stmt).scalars().first()
-
-    @staticmethod
-    def get_valid_by_jti(db: Session, jti: str) -> RefreshToken | None:
-        rt = RefreshTokenRepository.get_by_jti(db, jti)
-        if not rt:
-            return None
-        if rt.revoked_at is not None:
-            return None
-        if rt.expires_at <= datetime.now(timezone.utc):
-            return None
-        return rt
+        t = db.execute(stmt).scalars().first()
+        if not t:
+            raise ResourceNotFoundException(f"Refresh token not found for {jti}")
+        return t
 
     @staticmethod
     def revoke(db: Session, *, jti: str) -> None:

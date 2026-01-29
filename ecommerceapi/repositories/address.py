@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ecommerceapi.models.address import Address
+from ecommerceapi.core.exceptions import ResourceNotFoundException
 
 
 class AddressRepository:
@@ -28,6 +29,9 @@ class AddressRepository:
         return addr
 
     @staticmethod
-    def get_by_user_id(db: Session, user_id: int) -> Address | None:
+    def get_by_user_id(db: Session, user_id: int) -> Address:
         stmt = select(Address).where(Address.user_id == user_id)
-        return db.execute(stmt).scalars().first()
+        address = db.execute(stmt).scalars().first()
+        if not address:
+            raise ResourceNotFoundException(f"Address for user_id={user_id} not found")
+        return address
