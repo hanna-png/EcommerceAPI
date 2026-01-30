@@ -1,10 +1,10 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from ecommerceapi.repositories.refresh_token import RefreshTokenRepository
 from ecommerceapi.models.user import User
 from ecommerceapi.models.refresh_token import RefreshToken
 from tests.factories.user_factory import UserFactory
+import ecommerceapi.services.security_service as security_service
 
 
 def test_register_success(test_client: TestClient) -> None:
@@ -145,7 +145,9 @@ def test_refresh_does_not_revoke_old_token_if_create_fails(
     def throw_an_exception(*args, **kwargs):
         raise Exception("DB insert failed")
 
-    monkeypatch.setattr(RefreshTokenRepository, "create", throw_an_exception())
+    monkeypatch.setattr(
+        security_service.RefreshTokenRepository, "create", throw_an_exception
+    )
 
     resp = test_client.post("/auth/refresh", params={"refresh_token": old_refresh})
     assert resp.status_code == 500
