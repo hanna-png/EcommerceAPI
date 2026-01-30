@@ -7,7 +7,7 @@ from ecommerceapi.core.exceptions import ResourceNotFoundException
 
 class UserRepository:
     @staticmethod
-    def get_by_email(db: Session, email: str) -> User | None:
+    def get_by_email(db: Session, email: str) -> User:
         stmt = select(User).where(User.email == email)
         u = db.execute(stmt).scalars().first()
         if not u:

@@ -53,11 +53,10 @@ class SecurityService:
         if not jti or not sub:
             raise UnauthorizedException("Invalid refresh token ")
 
-        rt = SecurityService.get_valid_by_jti(db, payload["jti"])
+        rt = SecurityService.get_valid_by_jti(db, jti)
         user_id = int(sub)
         if not rt:
             RefreshTokenRepository.revoke_all_for_user(db, user_id=user_id)
-            # commit in service because we want to revoke AND raise an exception
             db.commit()
             raise UnauthorizedException("Refresh token revoked or expired")
 
@@ -71,8 +70,9 @@ class SecurityService:
     @staticmethod
     def register(db: Session, payload: RegisterIn):
         try:
-            UserRepository.get_by_email(db, payload.email)
-            raise ValidationException("Email already registered")
+            u = UserRepository.get_by_email(db, payload.email)
+            if u:
+                raise ValidationException("Email already registered")
         except ResourceNotFoundException:
             pass
 
@@ -107,6 +107,7 @@ class SecurityService:
             user = UserRepository.get_by_email(db, email)
         except ResourceNotFoundException:
             raise UnauthorizedException("User not found")
+
         if not verify_password(password, user.hashed_password):
             raise UnauthorizedException("Invalid credentials")
 
