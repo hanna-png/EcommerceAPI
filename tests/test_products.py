@@ -44,3 +44,15 @@ def test_products_details_returns_correct_product(
     assert set(category.keys()) == {"id", "name"}
     assert category["id"] == product.category.id
     assert category["name"] == product.category.name
+
+
+def test_product_serialized_starts_with_a_true(
+    test_client: TestClient,
+    product_factory: ProductFactory,
+    category_factory: CategoryFactory,
+):
+    p = product_factory.create(name="Apple")
+    resp = test_client.get(f"/products/{p.id}/serialized")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["starts_with_a"] is True

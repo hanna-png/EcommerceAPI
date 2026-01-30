@@ -2,6 +2,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from ecommerceapi.models.product import Product
+from ecommerceapi.core.exceptions import ResourceNotFoundException
 
 
 class ProductRepository:
@@ -34,11 +35,14 @@ class ProductRepository:
         return db.execute(stmt).scalars().all()
 
     @staticmethod
-    def get_by_id(db: Session, product_id: int) -> Product | None:
+    def get_by_id(db: Session, product_id: int) -> Product:
         """Retrieve product by id."""
         stmt = (
             select(Product)
             .options(joinedload(Product.category))
             .where(Product.id == product_id)
         )
-        return db.execute(stmt).scalars().first()
+        p = db.execute(stmt).scalars().first()
+        if not p:
+            raise ResourceNotFoundException(f"Product with id={product_id} not found")
+        return p

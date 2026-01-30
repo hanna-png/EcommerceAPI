@@ -2,8 +2,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from ecommerceapi.db.database import get_db
-from ecommerceapi.schemas.product import ProductListOut, ProductDetailOut
+from ecommerceapi.schemas.product import (
+    ProductListOut,
+    ProductDetailOut,
+    ProductSerializedOut,
+)
 from ecommerceapi.repositories.product import ProductRepository
+from ecommerceapi.serializers.product_serializer import serialize_product
+
 
 product_router = APIRouter(prefix="/products", tags=["products"])
 
@@ -26,3 +32,12 @@ def get_product_details(
     Retrieve a detailed description of a product.
     """
     return ProductRepository().get_by_id(db, product_id)
+
+
+@product_router.get("/{product_id}/serialized", response_model=ProductSerializedOut)
+def get_product_serialized(
+    product_id: int, db: Session = Depends(get_db)
+) -> ProductSerializedOut:
+    """Endpoint for testing serialization"""
+    product = ProductRepository.get_by_id(db, product_id)
+    return serialize_product(product)
