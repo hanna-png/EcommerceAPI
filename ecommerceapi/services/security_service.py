@@ -133,20 +133,6 @@ class SecurityService:
         payload = SecurityService._validate_refresh_token(db, refresh_token)
 
         user_id = int(payload["sub"])
-
-        rt = SecurityService.get_valid_by_jti(db, payload["jti"])
-
-        if not rt:
-            RefreshTokenRepository.revoke_all_for_user(db, user_id=user_id)
-            # commit in service because we want to revoke AND raise an exception
-            db.commit()
-            raise UnauthorizedException("Refresh token revoked or expired")
-
-        if rt.token_hash != hash_token(refresh_token):
-            RefreshTokenRepository.revoke_all_for_user(db, user_id=user_id)
-            db.commit()
-            raise UnauthorizedException("Refresh token is not correct.")
-
         RefreshTokenRepository.revoke(db, jti=payload["jti"])
 
         new_access = create_access_token(user_id=str(user_id))
