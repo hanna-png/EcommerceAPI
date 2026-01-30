@@ -21,6 +21,7 @@ from ecommerceapi.core.exceptions import (
     BaseAppException,
     ResourceNotFoundException,
 )
+from ecommerceapi.core.logging import logger
 
 
 class SecurityService:
@@ -93,6 +94,7 @@ class SecurityService:
                 country=payload.address.country,
             )
             user.address = address
+            logger.info(f"User {user.id} registered successfully")
             return user
 
         except Exception:
@@ -118,6 +120,7 @@ class SecurityService:
             token_hash=hash_token(refresh),
             expires_at=refresh_exp,
         )
+        logger.info(f"User {email} logged in successfully")
 
         return TokenPair(access_token=access, refresh_token=refresh)
 
@@ -126,6 +129,7 @@ class SecurityService:
         payload = SecurityService._validate_refresh_token(db, refresh_token)
 
         RefreshTokenRepository.revoke(db, jti=payload["jti"])
+        logger.info(f"User {payload.get('sub')} logged out successfully")
         return MessageOut(message="ok")
 
     @staticmethod
@@ -145,5 +149,6 @@ class SecurityService:
             token_hash=hash_token(new_refresh),
             expires_at=new_exp,
         )
+        logger.info(f"User {user_id} refreshed token successfully")
 
         return TokenPair(access_token=new_access, refresh_token=new_refresh)

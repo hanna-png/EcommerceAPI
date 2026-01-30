@@ -16,6 +16,7 @@ from ecommerceapi.core.logging import logger
 
 app = FastAPI()
 app.include_router(api_router)
+logger.info("Application started")
 
 
 @app.get("/health")
@@ -28,8 +29,7 @@ def health(db: Session = Depends(get_db)):
 def app_exception_handler(request: Request, exc: BaseAppException):
     error = ErrorOut(detail=exc.message)
     logger.error(
-        f"{exc.__class__.__name__} | {request.method} {request.url.path} | {exc.message}",
-        exc_info=True,
+        f"{exc.__class__.__name__} | {request.method} {request.url.path} | {exc.message}"
     )
 
     if isinstance(exc, ResourceNotFoundException):
@@ -46,9 +46,6 @@ def app_exception_handler(request: Request, exc: BaseAppException):
 
 @app.exception_handler(Exception)
 def unhandled_exception_handler(request: Request, exc: Exception):
-    logger.critical(
-        f"Unhandled error | {request.method} {request.url.path}",
-        exc_info=True,
-    )
+    logger.error(f"Unhandled error | {request.method} {request.url.path}", exc_info=exc)
     error = ErrorOut(detail="Unexpected error occurred.")
     return JSONResponse(status_code=500, content=error.model_dump())

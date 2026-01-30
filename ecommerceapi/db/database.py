@@ -2,11 +2,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from ecommerceapi.core.config import settings
+from ecommerceapi.core.logging import logger
 
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
 )
+logger.info("Database engine created")
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
