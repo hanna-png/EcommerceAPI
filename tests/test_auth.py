@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import select
-from ecommerceapi.models.user import User
 
+from ecommerceapi.repositories.refresh_token import RefreshTokenRepository
+from ecommerceapi.models.user import User
+from ecommerceapi.models.refresh_token import RefreshToken
 from tests.factories.user_factory import UserFactory
 
 
@@ -116,3 +118,42 @@ def test_get_missing_resource_returns_404(test_client):
     resp = test_client.get("/products/999999")
     assert resp.status_code == 404
     assert resp.json()["detail"]
+
+
+def test_refresh_does_not_revoke_old_token_if_create_fails(
+    test_client, db_test_session, user_factory, monkeypatch
+):
+    u = user_factory.create()
+    login = test_client.post(
+        "/auth/login", data={"username": u.email, "password": "password123"}
+    )
+    assert login.status_code == 200
+    old_refresh = login.json()["refresh_token"]
+
+    old_rt_in_db = (
+        db_test_session.execute(
+            select(RefreshToken).where(
+                RefreshToken.user_id == u.id, RefreshToken.revoked_at.is_(None)
+            )
+        )
+        .scalars()
+        .first()
+    )
+    assert old_rt_in_db is not None
+    old_jti = old_rt_in_db.jti
+
+    def throw_an_exception(*args, **kwargs):
+        raise Exception("DB insert failed")
+
+    monkeypatch.setattr(RefreshTokenRepository, "create", throw_an_exception())
+
+    resp = test_client.post("/auth/refresh", params={"refresh_token": old_refresh})
+    assert resp.status_code == 500
+
+    old_rt_is_still_active = (
+        db_test_session.execute(select(RefreshToken).where(RefreshToken.jti == old_jti))
+        .scalars()
+        .first()
+    )
+    assert old_rt_is_still_active is not None
+    assert old_rt_is_still_active.revoked_at is None

@@ -104,15 +104,16 @@ def db_test_session(test_session_factory: sessionmaker, engine_test: Engine):
 
 
 @pytest.fixture()
-def test_client(db_test_session: Session):
+def test_client(db_test_session):
     """Create FastAPI TestClient"""
 
     def override_get_db():
+        nested = db_test_session.begin_nested()
         try:
             yield db_test_session
-            db_test_session.commit()
+            nested.commit()
         except Exception:
-            db_test_session.rollback()
+            nested.rollback()
             raise
 
     app.dependency_overrides[get_db] = override_get_db
