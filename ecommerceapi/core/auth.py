@@ -3,7 +3,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from ecommerceapi.core.security import decode_token
-from ecommerceapi.core.exceptions import UnauthorizedException
+from ecommerceapi.core.exceptions import (
+    UnauthorizedException,
+    ResourceNotFoundException,
+)
 from ecommerceapi.db.database import get_db
 from ecommerceapi.repositories.user import UserRepository
 
@@ -25,4 +28,10 @@ def get_current_user(
     if not sub:
         raise UnauthorizedException("Invalid access token")
 
-    return UserRepository.get_by_id(db, int(sub))
+    try:
+        u = UserRepository.get_by_id(db, int(sub))
+        if not u:
+            raise UnauthorizedException("Invalid access token")
+        return u
+    except ResourceNotFoundException:
+        pass
