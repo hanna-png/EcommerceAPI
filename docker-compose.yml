@@ -10,9 +10,34 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - rabbitmq
     volumes:
       - .:/app
     command: poetry run uvicorn ecommerceapi.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build: .
+    container_name: ecommerce_worker
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app
+    depends_on:
+      - db
+      - rabbitmq
+    volumes:
+      - .:/app
+    command: poetry run celery -A ecommerceapi.core.celery.celery_app worker --loglevel=INFO
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ecommerce_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
 
   db:
     image: postgres:16

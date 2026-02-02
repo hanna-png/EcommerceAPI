@@ -16,6 +16,7 @@ class DeliveryMethod(str, Enum):
 
 class OrderStatus(str, Enum):
     submitted = "submitted"
+    approved = "approved"
     paid = "paid"
     shipped = "shipped"
     delivered = "delivered"

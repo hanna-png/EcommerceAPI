@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ecommerceapi.core.exceptions import ResourceNotFoundException
 from ecommerceapi.models.order import Order
+from ecommerceapi.core.celery import verify_and_approve_order
 
 
 class OrderRepository:
@@ -11,6 +12,8 @@ class OrderRepository:
         db.add(order)
         db.flush()
         db.refresh(order)
+        db.commit()
+        verify_and_approve_order.delay(order.id)
         return order
 
     @staticmethod
