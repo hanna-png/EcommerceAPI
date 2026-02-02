@@ -30,13 +30,10 @@ def test_create_and_list_orders(
     user_factory: UserFactory,
     product_factory: ProductFactory,
     category_factory: CategoryFactory,
+    test_access_token,
 ):
-    u = user_factory.create()
-
-    headers = auth_header(test_client, u.email, "password123")
-
     payload = get_payload(test_client, user_factory, product_factory, category_factory)
-    create = test_client.post("/orders", json=payload, headers=headers)
+    create = test_client.post("/orders", json=payload, headers=test_access_token)
     assert create.status_code == 201
     created = create.json()
 
@@ -45,7 +42,7 @@ def test_create_and_list_orders(
     assert created["delivery_method"] == "courier"
     assert created["purchase_price"] == 200
 
-    lst = test_client.get("/orders", headers=headers)
+    lst = test_client.get("/orders", headers=test_access_token)
     assert lst.status_code == 200
 
 
@@ -54,22 +51,11 @@ def test_invalid_payment_method_rejected(
     user_factory: UserFactory,
     product_factory: ProductFactory,
     category_factory: CategoryFactory,
+    test_access_token,
 ):
-    u = user_factory.create()
-    headers = auth_header(test_client, u.email, "password123")
     # invalid enum - no "paypal" available
     payload = get_payload(test_client, user_factory, product_factory, category_factory)
     payload["payment_method"] = "paypal"
 
-    resp = test_client.post("/orders", json=payload, headers=headers)
+    resp = test_client.post("/orders", json=payload, headers=test_access_token)
     assert resp.status_code == 422
-
-
-def auth_header(test_client: TestClient, email: str, password: str) -> dict[str, str]:
-    resp = test_client.post(
-        "/auth/login", data={"username": email, "password": password}
-    )
-    """ Helper for checking Bearer token in headers"""
-    assert resp.status_code == 200
-    token = resp.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
