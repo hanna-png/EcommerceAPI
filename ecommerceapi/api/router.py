@@ -2,8 +2,10 @@ from fastapi import APIRouter
 from ecommerceapi.api.routes.category import category_router
 from ecommerceapi.api.routes.product import product_router
 from ecommerceapi.api.routes.auth import auth_router
+from ecommerceapi.api.routes.order import order_router
 
 api_router = APIRouter()
 api_router.include_router(category_router)
 api_router.include_router(product_router)
 api_router.include_router(auth_router)
+api_router.include_router(order_router)
