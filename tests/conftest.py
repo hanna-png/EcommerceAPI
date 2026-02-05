@@ -140,3 +140,15 @@ def product_factory(db_test_session):
 def user_factory(db_test_session):
     UserFactory._meta.sqlalchemy_session = db_test_session
     return UserFactory
+
+
+@pytest.fixture()
+def test_access_token(test_client: TestClient, user_factory):
+    u = user_factory.create()
+    resp = test_client.post(
+        "/auth/login",
+        data={"username": u.email, "password": "password123"},
+    )
+    assert resp.status_code == 200, resp.json()
+    access = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {access}"}

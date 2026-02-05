@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
+    celery_broker_url: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

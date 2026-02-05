@@ -27,3 +27,6 @@ dump-dev:
 # Restore the dev database from the last dump
 restore-dev:
 	docker compose exec db sh -lc 'pg_restore -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" --clean --if-exists /dumps/dev.dump'
+# Create a new Alembic migration from model changes
+revision:
+	docker compose exec api poetry run alembic revision --autogenerate -m "$(m)"
