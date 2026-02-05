@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from ecommerceapi.core.exceptions import ResourceNotFoundException
 from ecommerceapi.models.order import Order
-from ecommerceapi.core.celery import verify_and_approve_order
+from ecommerceapi.core.celery_tasks import verify_and_approve_order
 
 
 class OrderRepository:
